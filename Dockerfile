@@ -3,8 +3,8 @@ FROM node:alpine
 # Create the build arguments
 ARG uid=1001
 ARG gid=1001
-ARG user=xsla
-ARG group=xsla
+ARG user=xslt
+ARG group=xslt
 ARG CLI_HOME=/project
 ARG SRC=/src
 
@@ -26,7 +26,7 @@ WORKDIR ${SRC}
 COPY package*.json ./  
 RUN npm install
 
-# Copy the source code of the XSLA tool
+# Copy the source code of the xslt tool
 COPY . . 
 
 #Setup the user for the container with the needed permissions and directory
