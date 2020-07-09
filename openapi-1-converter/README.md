@@ -1,6 +1,12 @@
-# XSLT-Based Tools
+# OData V2 to OpenAPI v1
 
-Tools for transforming [OData](http://www.odata.org) CSDL (`$metadata`) XML documents into [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents.
+The purpose of this tool is to transform [OData V2](http://www.odata.org) CSDL (`$metadata`) XML documents into [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents.
+
+_Note: if you want to transform OData V3, V4, or V4.01 into OpenAPI 3.0.x, you better use the [pure Node.js-based tool](test)._
+
+This tool can either be used directly with nodejs or via a docker container. Both scenarios are described below.
+
+## General Information
 
 The core ingredient is the [`V4-CSDL-to-OpenAPI.xsl`](V4-CSDL-to-OpenAPI.xsl) transformation. It transforms OData CSDL XML Version 4.0 documents into either OpenAPI 3.0.0 or Swagger 2.0 documents.
 
@@ -10,12 +16,51 @@ The two files [`transform.js`](transform.js) and [`transform.cmd`](transform.cmd
 
 The mapping can be fine-tuned via [annotations](../doc/Annotations.md) in the CSDL (`$metadata`) XML documents.
 
+## Use with Docker
 
-## `transform.js` for Node.js
+### How to use this image
+The image sets a persistent volume ```/project```. Therefore, you have to mount the folder containing the CSDL (`$metadata`) XML document into the image at ```/project```. The default entry point is set to the transform script. So if you execute the tool without any parameters it will show the help information.
 
-_Note: if you want to transform OData V3, V4, or V4.01 into OpenAPI 3.0.x, you better use the [pure Node.js-based tool](../lib)._
+ 
+To see the help information of the CLI, execute:
 
-This script transforms one or more OData CSDL (`$metadata`) XML documents into OpenAPI JSON documents. 
+```docker run ccfc/odata-openapi1-converter```
+
+To convert a CSDL (`$metadata`) XML document ```test.xml``` to an OpenAPI v1.0 json file, execute:
+
+```docker run -v ${PWD}:/project ccfc/odata-openapi1-converter -dp test.xml```
+
+The above command will do the following:
+1. Run the container in the background
+1. Mont the current working directory to the /project folder in the container
+1. Instruct the transformer to generate a UML diagram ( -d ) and to pretty print the JSON output ( -p )
+1. Use the input file ```text.xml```
+
+When the transformation is done, there will be an output file generated called ```test.openapi.json``` in the current working directory
+
+### How to build this image
+
+Simply clone this repository, and move into the project directory where the docker file is located:
+
+```
+
+git clone https://github.deutsche-boerse.de/dev/sap.cicd-docker-images.git
+
+cd sap.cicd-docker-images/MTA/Cloud-MTA-Build-Tool
+
+```
+
+To perform a basic build, execute:
+
+```docker build -t ccfc/odata-openapi1-converter .```
+
+To perform a build and set the corporate proxy:
+
+```docker build --build-arg proxy=http://proxy.shrd.dbgcloud.io:3128 -t ccfc/odata-openapi1-converter .```
+
+## Use with NodeJS
+
+The script `transform.js` transforms one or more OData CSDL (`$metadata`) XML documents into OpenAPI JSON documents. 
 
 It uses [`xslt4node`](https://www.npmjs.com/package/xslt4node), which in turn needs [`node-gyp`](https://www.npmjs.com/package/node-gyp) and a [Java SE JDK](http://jdk.java.net).
 

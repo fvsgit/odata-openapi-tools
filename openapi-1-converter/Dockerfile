@@ -43,7 +43,7 @@ WORKDIR ${CLI_HOME}
 #ENTRYPOINT ["bash"]
 
 # Set the entry point to node
-ENTRYPOINT [ "node" ]
+ENTRYPOINT [ "node", "/src/transform.js"]
 
 # Set the start command to the CLI and the help parameter
-CMD ["/src/transform.js", "-h"]
+CMD ["-h"]
