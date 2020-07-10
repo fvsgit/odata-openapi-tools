@@ -8,6 +8,13 @@ ARG group=xslt
 ARG CLI_HOME=/project
 ARG SRC=/src
 
+#Define a build argument to set the proxy if needed
+ARG proxy=http://proxy.shrd.dbgcloud.io:3128
+
+#Set the HTTP and HTTPS proxies according to the passed in proxy or default
+ENV HTTP_PROXY=$proxy
+ENV HTTPS_PROXY=$proxy
+
 # Install dependancies and tools
 RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python bash
 RUN npm install --quiet node-gyp -g
