@@ -16,8 +16,10 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "express-fileupload": "^1.1.7-alpha.3",
     "express-request-id": "^1.4.1",
     "express-xml-bodyparser": "^0.3.0",
+    "fast-xml-parser": "^3.17.4",
     "fs": "0.0.1-security",
     "minimist": "^1.2.0",
     "request": "^2.88.2",
@@ -25,6 +27,8 @@
     "request-promise-native": "^1.0.8",
     "request-promises": "^1.1.0",
     "xml-js": "^1.6.11",
+    "xml-parse": "^0.4.0",
+    "xmldom": "^0.3.0",
     "xmlserializer": "^0.6.1",
     "xslt4node": "^0.3.2"
   }
