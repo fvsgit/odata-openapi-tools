@@ -1,24 +1,20 @@
 const express = require("express");
 const fs = require("fs");
-const { exec } = require('child_process');
-const xmlparser = require('express-xml-bodyparser');
-var convert = require('xml-js');
+const { exec } = require('child_process');  
 
 const rp = require("request-promises");
 var addRequestId = require('express-request-id')();
 
 const app = express();
-const bodyparser = require("body-parser");
-const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require("constants");
+const bodyparser = require("body-parser"); 
 
 const port = process.env.PORT || 3200;
 
 // middleware
 
 app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
-app.use(xmlparser());
-app.use(addRequestId);
+app.use(bodyparser.urlencoded({ extended: true })); 
+app.use(addRequestId);  
 
 app.get("/oas", (req, res) => {
 
@@ -36,7 +32,7 @@ app.get("/oas", (req, res) => {
     fs.unlinkSync(jsonFilePath);
   }
 
-  rp('https://services.odata.org/V2/Northwind/Northwind.svc/$metadata')
+  rp(req.query.url)
     .then(function (xmlMetadata) {
       // Process html...
 
@@ -52,12 +48,12 @@ app.get("/oas", (req, res) => {
           console.error(`stderr: ${stderr}`);
 
           if (fs.existsSync(jsonFile)) {
-            
+
             var raw = fs.readFileSync(jsonFilePath);
             oasObject = JSON.parse(raw);
             res.status(200).send(oasObject);
 
-          }else{
+          } else {
 
           }
 
@@ -72,14 +68,8 @@ app.get("/oas", (req, res) => {
       // Crawling failed...
     });
 
-  
-});
 
-app.post('/xmltest', function(req, res, next) {
-  
-  result = convert.js2xml(req.body, {compact: true, spaces: 1}); 
- 
-});
+});  
 
 app.listen(port, () => {
   console.log(`running at port ${port}`);
