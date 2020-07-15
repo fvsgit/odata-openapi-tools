@@ -21,15 +21,7 @@
     "express-xml-bodyparser": "^0.3.0",
     "fast-xml-parser": "^3.17.4",
     "fs": "0.0.1-security",
-    "minimist": "^1.2.0",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.5",
-    "request-promise-native": "^1.0.8",
-    "request-promises": "^1.1.0",
-    "xml-js": "^1.6.11",
-    "xml-parse": "^0.4.0",
-    "xmldom": "^0.3.0",
-    "xmlserializer": "^0.6.1",
+    "minimist": "^1.2.0", 
     "xslt4node": "^0.3.2"
   }
 }

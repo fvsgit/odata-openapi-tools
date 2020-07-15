@@ -1,49 +1,52 @@
-FROM node:alpine
+FROM adoptopenjdk:8-jdk-hotspot-bionic
+LABEL maintainer "Tim Brust <github@timbrust.de>"
 
-# Create the build arguments
-ARG uid=1001
-ARG gid=1001
-ARG user=xslt
-ARG group=xslt
-ARG CLI_HOME=/project
-ARG SRC=/src
+ARG NODE_USER_HOME=/home/node
 
-# Install dependancies and tools
-RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python bash
-RUN npm install --quiet node-gyp -g
-RUN apk add openjdk8
+ARG REFRESHED_AT
+ENV REFRESHED_AT $REFRESHED_AT
 
-# Set the JAVA path vaiables
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
-ENV PATH="$JAVA_HOME/bin:${PATH}" 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ 
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update -qq && apt-get install -qq --no-install-recommends \
+    nodejs \
+    yarn \ 
+    g++ make python \
+    && rm -rf /var/lib/apt/lists/*
 
-# Switch to the SRC directory
-WORKDIR ${SRC}
+RUN useradd --home-dir "${NODE_USER_HOME}" \
+    --create-home \
+    --shell /bin/bash \
+    --user-group \
+    --uid 1000 \
+    --comment 'OAS tooling' \
+    --password "$(echo weUseMta |openssl passwd -1 -stdin)" node
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./  
+# Create our containers WORKDIR and "node_modules" directory.
+# Give the user:group "node" ownership of all files/directories in our containers WORKDIR
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+
+# Tell our container which directory to use as the WORKDIR
+WORKDIR /home/node/app
+
+# Copy over our local version of "package.json" and "package-lock.json" into our container
+COPY package*.json ./
+
+# Creates a user for our container
+USER node
+
+# Installs our NPM packages from the "package.json" file we moved from local in to our container
 RUN npm install
 
-# Copy the source code of the xslt tool
-COPY . . 
+# Tells our container who owns the copied content
+COPY --chown=node:node . .
 
-#Setup the user for the container with the needed permissions and directory
-RUN mkdir -p $CLI_HOME \
-  && chown ${uid}:${gid} $CLI_HOME \
-  && chmod 660 $CLI_HOME \
-  && addgroup -g ${gid} ${group} \
-  && adduser -h "$CLI_HOME" -u ${uid} -G ${group} -s /bin/bash -D ${user}
+# Exposes the port "3000" from our container
+# This is also how we can connect to our container from our host machine (the one you're reading this from now)
+EXPOSE 3300
 
-# Create a volume and working directory
-VOLUME ${CLI_HOME}
-WORKDIR ${CLI_HOME} 
-
-#ENTRYPOINT ["bash"]
-
-# Set the entry point to node
-ENTRYPOINT [ "node", "/src/transform.js"]
-
-# Set the start command to the CLI and the help parameter
-CMD ["-h"]
+# An array of commands our container needs to run when we start it
+CMD ["npm", "run", "start"]

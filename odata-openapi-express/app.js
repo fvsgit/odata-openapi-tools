@@ -19,30 +19,29 @@ const cleanup = function (sRequestId, sXMLFile, sJSONFile) {
 
   try {
 
-    console.info("cleaning up temp files for request: " + sRequestId);
+    console.info(prepareMsg(sRequestId, "cleaning up temp files"));
 
     //Check id the xml file exists. If it exists, delete it
     if (fs.existsSync(sXMLFile)) {
       fs.unlinkSync(sXMLFile);
-      console.info("Deleted file: " + sXMLFile);
+      console.info(prepareMsg(sRequestId, "Deleted file: " + sXMLFile));
     }
 
     //Check id the json file exists. If it exists, delete it
     if (fs.existsSync(sJSONFile)) {
       fs.unlinkSync(sJSONFile);
-      fs.unlinkSync(sXMLFile);
-      console.info("Deleted file: " + sXMLFile);
+      console.info(prepareMsg(sRequestId, "Deleted file: " + sJSONFile));
     }
 
-    console.info("Cleanup done.");
+    console.info(prepareMsg(sRequestId, "Cleanup done."));
 
   } catch (error) {
-    console.error("Error while cleaning up the tmp files for request: " + sRequestId);
+    console.error(prepareMsg(sRequestId, "Error while cleaning up the tmp files: " + error));
   }
 
 }
 
-const validateRequest = function (req, res) {
+const validateRequest = function (req, res, sRequestId) {
 
   //Check if the body of the request is not empty and that the metadata has been passed
   if (req.body && req.body.metadata) {
@@ -50,14 +49,13 @@ const validateRequest = function (req, res) {
     try {
       var jsonObj = parser.parse(req.body.metadata, undefined, true);
     } catch (error) {
-      console.info("Invalid XML received");
+      console.info(prepareMsg(sRequestId, "Invalid XML received: " + error.message));
       sendResponse(res, 500, "Invalid XML: " + error.message);
-
     }
 
   } else {
 
-    console.info("Request not valid");
+    console.info(prepareMsg(sRequestId, "Request not valid"));
     sendResponse(res, 400, "The XML metadata of the odata service needs to be added to the body of the request in the metadata key.");
 
   }
@@ -69,12 +67,13 @@ const sendResponse = function (res, status, message) {
     res.status(status).send(message);
 }
 
+const prepareMsg = function (sRequestId, sMsg) {
+  return "[" + sRequestId + "] - " + Date.now() + " => " + sMsg;
+}
+
 app.post("/convert", (req, res) => {
 
   try {
-
-    //Validate the request and reject it if it is not complete
-    validateRequest(req, res);
 
     //Create unique file names based on the current request id
     var requestId = req.id;
@@ -83,26 +82,28 @@ app.post("/convert", (req, res) => {
     var xmlFilePath = "./tmp/" + xmlFile;
     var jsonFilePath = "./tmp/" + jsonFile;
 
-    console.info("Processing request: " + requestId);
+    //Validate the request and reject it if it is not complete
+    validateRequest(req, res, requestId);
+
+
+    console.info(prepareMsg(requestId, "Processing new request"));
 
     fs.writeFileSync(xmlFilePath, req.body.metadata);
-    console.info("Created the file: " + xmlFilePath);
+    console.info(prepareMsg(requestId, "Created the file: " + xmlFilePath));
 
-    console.info("Transforming the XML to OAS..." + xmlFilePath);
+    console.info(prepareMsg(requestId, "Transforming the XML to OAS..." + xmlFilePath));
     exec('node transform -dp ' + xmlFilePath, (error, stdout, stderr) => {
       if (error) {
-        console.error(`exec error: ${error}`);
+        console.error(prepareMsg(requestId, "exec error: " + error));
         sendResponse(res, 500, "Could not convert the XML metadata to OAS");
         cleanup(requestId, xmlFilePath, jsonFilePath);
         return;
-      }
-      console.log(`stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
+      } 
 
       //Check if the matching OAS JSON file was created. If it was, it means the transformation was successful
       if (fs.existsSync(jsonFilePath)) {
 
-        console.info("Transformation to OAS completed. Output file: " + jsonFile);
+        console.info(prepareMsg(requestId, "Transformation to OAS completed. Output file: " + jsonFile));
         var raw = fs.readFileSync(jsonFilePath);
         oasObject = JSON.parse(raw);
         sendResponse(res, 200, oasObject);
@@ -110,7 +111,7 @@ app.post("/convert", (req, res) => {
 
       } else {
 
-        console.error("Transformation failed for request: " + requestId);
+        console.error(prepareMsg(requestId, "Transformation failed"));
         sendResponse(res, 500, "Could not convert the XML metadata to OAS");
         cleanup(requestId, xmlFilePath, jsonFilePath);
         return;
@@ -121,7 +122,7 @@ app.post("/convert", (req, res) => {
 
   } catch (error) {
 
-    console.error("Transformation failed for request: " + requestId);
+    console.error(prepareMsg(requestId, "Transformation failed"));
     sendResponse(res, 500, "Could not convert the XML metadata to OAS");
     cleanup(requestId, xmlFilePath, jsonFilePath);
 
@@ -130,5 +131,5 @@ app.post("/convert", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`running at port ${port}`);
+  console.log("running at port " + port);
 });
