@@ -1,13 +1,44 @@
 const express = require("express");
 const bodyparser = require("body-parser");
+var cors = require('cors')
 const { exec } = require('child_process');
 const fs = require("fs");
 var addRequestId = require('express-request-id')();
 var parser = require('fast-xml-parser');
 
+//Load the .ENV file
+require('dotenv').config();
+
 //Create an instance of the express app
 const app = express();
 const port = process.env.PORT || 3400;
+
+var allowedOrigins = null;
+if (process.env.ORIGIN) {
+
+  allowedOrigins = process.env.ORIGIN.split(" ");
+  if (allowedOrigins.length >= 1) {
+    app.use(cors({
+      origin: function (origin, callback) {
+        // allow requests with no origin 
+        // (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+          var msg = 'The CORS policy for this site does not ' +
+            'allow access from the specified Origin.';
+          return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+      }
+    }));
+
+  } else {
+    app.use(cors());
+  }
+
+} else {
+  app.use(cors());
+}
 
 // Setup the usage of the middleware
 app.use(bodyparser.json());
