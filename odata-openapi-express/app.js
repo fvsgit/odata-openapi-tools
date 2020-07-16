@@ -87,7 +87,7 @@ app.post("/convert", (req, res) => {
 
 
     console.info(prepareMsg(requestId, "Processing new request"));
-
+    console.info(prepareMsg(requestId, req.body.metadata));
     fs.writeFileSync(xmlFilePath, req.body.metadata);
     console.info(prepareMsg(requestId, "Created the file: " + xmlFilePath));
 

@@ -2,9 +2,18 @@ FROM adoptopenjdk:8-jdk-hotspot-bionic
 LABEL maintainer "Tim Brust <github@timbrust.de>"
 
 ARG NODE_USER_HOME=/home/node
-
 ARG REFRESHED_AT
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+COPY proxy.conf /etc/apt/apt.conf.d/proxy.conf
+
 ENV REFRESHED_AT $REFRESHED_AT
+
+RUN echo "Proxy {$HTTP_PROXY}"
+
+#Set the HTTP and HTTPS proxies according to the passed in proxy or default
+ENV HTTP_PROXY=$HTTP_PROXY
+ENV HTTPS_PROXY=$HTTP_PROXY
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
  
