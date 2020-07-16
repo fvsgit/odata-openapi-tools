@@ -111,7 +111,7 @@ app.post("/convert", (req, res) => {
 
       } else {
 
-        console.error(prepareMsg(requestId, "Transformation failed"));
+        console.error(prepareMsg(requestId, "Transformation failed: " + error));
         sendResponse(res, 500, "Could not convert the XML metadata to OAS");
         cleanup(requestId, xmlFilePath, jsonFilePath);
         return;
@@ -122,7 +122,7 @@ app.post("/convert", (req, res) => {
 
   } catch (error) {
 
-    console.error(prepareMsg(requestId, "Transformation failed"));
+    console.error(prepareMsg(requestId, "Transformation failed: " + error));
     sendResponse(res, 500, "Could not convert the XML metadata to OAS");
     cleanup(requestId, xmlFilePath, jsonFilePath);
 
