@@ -21,7 +21,7 @@
     "express-xml-bodyparser": "^0.3.0",
     "fast-xml-parser": "^3.17.4",
     "fs": "0.0.1-security",
-    "minimist": "^1.2.0", 
+    "minimist": "^1.2.0",
     "xslt4node": "^0.3.2"
   }
 }

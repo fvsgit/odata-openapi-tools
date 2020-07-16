@@ -7,7 +7,7 @@ var parser = require('fast-xml-parser');
 
 //Create an instance of the express app
 const app = express();
-const port = process.env.PORT || 3300;
+const port = process.env.PORT || 3400;
 
 // Setup the usage of the middleware
 app.use(bodyparser.json());
@@ -87,13 +87,8 @@ app.post("/convert", (req, res) => {
 
     console.info(prepareMsg(requestId, "Processing new request")); 
 
-    fs.writeFileSync(xmlFilePath, req.body.metadata);
-    if (fs.existsSync(sXMLFile)) {
-      console.info(prepareMsg(requestId, "exists"));
-    }else{
-      console.error(prepareMsg(requestId, "missing"));
-    }
-    
+    fs.writeFileSync(xmlFilePath, req.body.metadata); 
+
     console.info(prepareMsg(requestId, "Created the file: " + xmlFilePath));
 
     console.info(prepareMsg(requestId, "Transforming the XML to OAS..." + xmlFilePath));
