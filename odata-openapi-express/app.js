@@ -85,20 +85,25 @@ app.post("/convert", (req, res) => {
     //Validate the request and reject it if it is not complete
     validateRequest(req, res, requestId);
 
-    console.info(prepareMsg(requestId, "Processing new request")); 
+    console.info(prepareMsg(requestId, "Processing new request"));
 
-    fs.writeFileSync(xmlFilePath, req.body.metadata); 
+    //Check if the tmp directory exists, if not whe have to create it
+    if (!fs.existsSync("./tmp")) {
+      fs.mkdirSync("./tmp");
+    }
 
+    //Create the XML file with the content padded to this endpoint
+    fs.writeFileSync(xmlFilePath, req.body.metadata);
     console.info(prepareMsg(requestId, "Created the file: " + xmlFilePath));
-
+    
     console.info(prepareMsg(requestId, "Transforming the XML to OAS..." + xmlFilePath));
     exec('node transform -dp ' + xmlFilePath, (error, stdout, stderr) => {
       if (error) {
         console.error(prepareMsg(requestId, "exec error: " + error));
-        sendResponse(res, 500, "Could not convert the XML metadata to OAS");
+        sendResponse(res, 500, "Could not convert the XML metadata to OAS.");
         cleanup(requestId, xmlFilePath, jsonFilePath);
         return;
-      } 
+      }
 
       //Check if the matching OAS JSON file was created. If it was, it means the transformation was successful
       if (fs.existsSync(jsonFilePath)) {
