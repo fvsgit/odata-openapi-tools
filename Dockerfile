@@ -14,6 +14,7 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN apt-get update -qq && apt-get install -qq --no-install-recommends \
     nodejs \
     yarn \ 
+    git \
     g++ make python \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,11 +30,15 @@ RUN useradd --home-dir "${NODE_USER_HOME}" \
 # Give the user:group "node" ownership of all files/directories in our containers WORKDIR
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
+RUN git clone "https://github.com/fvsgit/odata-openapi-tools.git"
+
+RUN cp odata-openapi-tools/odata-openapi-express/* /home/node/app
+
 # Tell our container which directory to use as the WORKDIR
 WORKDIR /home/node/app
 
-# Copy over our local version of "package.json" and "package-lock.json" into our container
-COPY package*.json ./
+# # Copy over our local version of "package.json" and "package-lock.json" into our container
+# COPY package*.json ./
 
 # Creates a user for our container
 USER node
