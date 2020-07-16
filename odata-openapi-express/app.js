@@ -85,10 +85,15 @@ app.post("/convert", (req, res) => {
     //Validate the request and reject it if it is not complete
     validateRequest(req, res, requestId);
 
+    console.info(prepareMsg(requestId, "Processing new request")); 
 
-    console.info(prepareMsg(requestId, "Processing new request"));
-    console.info(prepareMsg(requestId, req.body.metadata));
     fs.writeFileSync(xmlFilePath, req.body.metadata);
+    if (fs.existsSync(sXMLFile)) {
+      console.info(prepareMsg(requestId, "exists"));
+    }else{
+      console.error(prepareMsg(requestId, "missing"));
+    }
+    
     console.info(prepareMsg(requestId, "Created the file: " + xmlFilePath));
 
     console.info(prepareMsg(requestId, "Transforming the XML to OAS..." + xmlFilePath));

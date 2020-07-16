@@ -39,7 +39,7 @@ RUN useradd --home-dir "${NODE_USER_HOME}" \
 # Give the user:group "node" ownership of all files/directories in our containers WORKDIR
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
-
+RUN ls -la
 RUN git clone "https://github.com/fvsgit/odata-openapi-tools.git"
 
 RUN cp -r odata-openapi-tools/odata-openapi-express/* /home/node/app
