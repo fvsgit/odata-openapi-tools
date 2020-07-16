@@ -21,17 +21,17 @@ const cleanup = function (sRequestId, sXMLFile, sJSONFile) {
 
     console.info(prepareMsg(sRequestId, "cleaning up temp files"));
 
-    //Check id the xml file exists. If it exists, delete it
-    if (fs.existsSync(sXMLFile)) {
+    //Delete the xml file if it exists
+    if (fs.existsSync(sXMLFile))
       fs.unlinkSync(sXMLFile);
-      console.info(prepareMsg(sRequestId, "Deleted file: " + sXMLFile));
-    }
 
-    //Check id the json file exists. If it exists, delete it
-    if (fs.existsSync(sJSONFile)) {
+    //Delete the json file if it exists
+    if (fs.existsSync(sJSONFile))
       fs.unlinkSync(sJSONFile);
-      console.info(prepareMsg(sRequestId, "Deleted file: " + sJSONFile));
-    }
+
+    //Delete the temp directory if it exists
+    if (fs.existsSync(sRequestId))
+      fs.rmdirSync(sRequestId, { recursive: true });
 
     console.info(prepareMsg(sRequestId, "Cleanup done."));
 
@@ -75,27 +75,26 @@ app.post("/convert", (req, res) => {
 
   try {
 
+    console.info(prepareMsg(requestId, "Processing new request"));
+
     //Create unique file names based on the current request id
     var requestId = req.id;
+
+    //Generate temp dir for the current request
+    var sTmpDir = fs.mkdirSync(requestId);
+
     var xmlFile = requestId + ".xml";
     var jsonFile = requestId + ".openapi.json";
-    var xmlFilePath = "./tmp/" + xmlFile;
-    var jsonFilePath = "./tmp/" + jsonFile;
+    var xmlFilePath = "./" + requestId + "/" + xmlFile;
+    var jsonFilePath = "./" + requestId + "/" + jsonFile;
 
     //Validate the request and reject it if it is not complete
     validateRequest(req, res, requestId);
 
-    console.info(prepareMsg(requestId, "Processing new request"));
-
-    //Check if the tmp directory exists, if not whe have to create it
-    if (!fs.existsSync("./tmp")) {
-      fs.mkdirSync("./tmp");
-    }
-
     //Create the XML file with the content padded to this endpoint
     fs.writeFileSync(xmlFilePath, req.body.metadata);
     console.info(prepareMsg(requestId, "Created the file: " + xmlFilePath));
-    
+
     console.info(prepareMsg(requestId, "Transforming the XML to OAS..." + xmlFilePath));
     exec('node transform -dp ' + xmlFilePath, (error, stdout, stderr) => {
       if (error) {
