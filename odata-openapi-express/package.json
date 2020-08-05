@@ -18,7 +18,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "express-fileupload": "^1.1.7-alpha.3",
+    "express-fileupload": "^1.1.9",
     "express-request-id": "^1.4.1",
     "express-xml-bodyparser": "^0.3.0",
     "fast-xml-parser": "^3.17.4",
